@@ -1,8 +1,8 @@
 services:
   app:
-    image: charty_image
+    image: graphout_image
     pull_policy: never
-    container_name: charty
+    container_name: graphout
     ports:
       - "127.0.0.1:8888:8888"
       - "127.0.0.1:5000:5000"

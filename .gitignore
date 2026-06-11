@@ -13,4 +13,5 @@ wheels/
 .env
 .ipynb_checkpoints/
 .virtual_documents/
+.Trash-0/
 docs/
