@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
-from accelerate import Accelerator
 from src.agents.config import BaseAgentConfig
 from transformers import AutoModelForCausalLM, AutoTokenizer
+from torch import Tensor
 
 class BaseAgent(ABC):
     def __init__(
@@ -10,29 +10,35 @@ class BaseAgent(ABC):
         model: AutoModelForCausalLM,
         config: BaseAgentConfig,
     ) -> None:
-        self.tokenizer = tokenizer
         self.model = model
+        self.tokenizer = tokenizer
 
+        self.adapter_name = config.adapter_name
+
+        self.tokenize_config = config.tokenize_config
         self.generate_config = config.generate_config
 
-    def _tokenize(self, prompt):
+    def _tokenize(
+        self,
+        prompt: list[dict[str, str]]
+    ) -> dict[str, Tensor]:
         return self.tokenizer.apply_chat_template(
-            prompt, 
-            tokenize=True, 
-            add_generation_prompt=True,
-            return_tensors="pt"
+            prompt,
+            **self.tokenize_config
         )
 
-    def _generate(self, tokenized_prompt):
+    def _generate(
+        self,
+        tokenized_prompt: dict[str, Tensor]
+    ) -> str:
+        input_length = tokenized_prompt["input_ids"].shape[-1]
         response = self.model.generate(
             **tokenized_prompt,
-            **generate_config,
+            **self.generate_config,
         )
-
-    def _decode(self) ->:
-        generated_tokens = response[0][tokenized_prompt.shape[-1]:]
+        generated_tokens = response[0][input_length:]
         return self.tokenizer.decode(generated_tokens, skip_special_tokens=True)
 
     @abstractmethod
-    def run(self) -> something:
+    def run(self) -> str:
         raise NotImplementedError("Override this method")
