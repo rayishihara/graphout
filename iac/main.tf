@@ -4,6 +4,16 @@ provider "aws" {
 }
 
 
+# ----- Fetch my IP -----
+data "http" "my_ip" {
+  url = "https://checkip.amazonaws.com"
+}
+
+locals {
+  my_ip_cidr = "${chomp(data.http.my_ip.response_body)}/32"
+}
+
+
 # ----- Network -----
 
 resource "aws_vpc" "main" {
@@ -34,18 +44,32 @@ resource "aws_route_table_association" "public" {
   route_table_id = aws_route_table.public.id
 }
 
-resource "aws_security_group" "ultra_safe" {
-  description = "Outbound only, no inbound at all, even from same SG"
+resource "aws_security_group" "fairly_safe" {
+  name        = "fairly-safe-sg"
+  description = "Allow only SSH inbound, allow all outbound"
   vpc_id      = aws_vpc.main.id
-
-  egress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
 }
 
+resource "aws_vpc_security_group_ingress_rule" "allow_ssh" {
+  security_group_id = aws_security_group.fairly_safe.id
+  cidr_ipv4         = local.my_ip_cidr
+  from_port         = 22
+  ip_protocol       = "tcp"
+  to_port           = 22
+}
+
+resource "aws_vpc_security_group_egress_rule" "allow_all" {
+  security_group_id = aws_security_group.fairly_safe.id
+  cidr_ipv4         = "0.0.0.0/0"
+  ip_protocol       = "-1"
+}
+
+
+# ----- SSH Key -----
+resource "aws_key_pair" "deployer" {
+  key_name   = "deployer-key"
+  public_key = file(var.ssh_public_key_path)
+}
 
 # ----- EC2 instance -----
 
@@ -64,10 +88,17 @@ data "aws_ami" "ubuntu" {
   }
 }
 
-resource "aws_instance" "example" {
+resource "aws_instance" "test" {
   ami                         = data.aws_ami.ubuntu.id
   instance_type               = "t3.micro"
   subnet_id                   = aws_subnet.public.id
-  vpc_security_group_ids      = [aws_security_group.ultra_safe.id]
+  vpc_security_group_ids      = [aws_security_group.fairly_safe.id]
   associate_public_ip_address = true
+  key_name                    = aws_key_pair.deployer.key_name
+
+  root_block_device {
+    encrypted = true
+  }
+
+  tags = { Name = "test-instance" }
 }

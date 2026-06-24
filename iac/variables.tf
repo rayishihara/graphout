@@ -24,11 +24,16 @@ variable "project" {
 variable "vpc_cidr" {
   type        = string
   description = "CIDR block for the VPC"
-  default     = "10.0.0.0/28"
+  default     = "10.0.0.0/24"
 }
 
 variable "public_subnet_cidr" {
   type        = string
   description = "CIDR block for the public subnet"
-  default     = "10.0.0.0/29"
+  default     = "10.0.0.0/28"
+}
+
+variable "ssh_public_key_path" {
+  type        = string
+  description = "Path to SSH public key"
 }
