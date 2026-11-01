@@ -1,6 +1,6 @@
 import os
 import time
-import shutil
+import tempfile
 import mlflow
 
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -34,13 +34,12 @@ class Analyst(BaseAgent):
         elif getattr(self.model, "_hf_peft_config_loaded", False):
             self.model.disable_adapters()  # Clear adapters, if at all used
 
-        with mlflow.start_run(run_name="analyst_inference", nested=True):
+        with mlflow.start_run(run_name="analyst_inference", nested=True), tempfile.TemporaryDirectory() as temp_dir:
             run_id = mlflow.active_run().info.run_id
 
             mlflow.log_param("user_message_preview", message[:200])
 
-            os.makedirs("/app/temp", exist_ok=True)
-            prompt_filepath = f"/app/temp/prompt_{run_id}.txt"
+            prompt_filepath = os.path.join(temp_dir, f"prompt_{run_id}.txt")
             with open(prompt_filepath, "w") as f:
                 f.write(message)
             mlflow.log_artifact(prompt_filepath)
@@ -55,13 +54,10 @@ class Analyst(BaseAgent):
             mlflow.log_metric("prompt_length_chars", len(message))
             mlflow.log_metric("response_length_chars", len(response))
 
-            response_filepath = f"/app/temp/response_{run_id}.txt"
+            response_filepath = os.path.join(temp_dir, f"response_{run_id}.txt")
             with open(response_filepath, "w") as f:
                 f.write(response)
             mlflow.log_artifact(response_filepath)
-
-            # Clean up temp files
-            shutil.rmtree("/app/temp")
 
         return response
         
