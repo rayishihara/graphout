@@ -19,7 +19,9 @@ def extract_csv_metadata(file_path):
         null_count = int(col_data.isna().sum())
 
         # Inferred type routing
-        if pd.api.types.is_bool_dtype(col_data):
+        non_null = col_data.dropna()
+        # Treat columns of True/False with blanks as boolean, since pandas reads them as object
+        if pd.api.types.is_bool_dtype(col_data) or (len(non_null) > 0 and non_null.map(type).eq(bool).all()):
             inferred_type = 'boolean'
         elif pd.api.types.is_datetime64_any_dtype(col_data):
             inferred_type = 'datetime'
