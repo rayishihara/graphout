@@ -15,3 +15,5 @@ wheels/
 .virtual_documents/
 .Trash-0/
 docs/
+mlflow.db
+mlruns/
