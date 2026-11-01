@@ -38,3 +38,14 @@ class AgentFactory:
         tokenizer, model = self._get_tokenizer_and_model(config)
     
         return Analyst(tokenizer, model, config)
+
+    def create_big_guy(self):
+        from src.agents.big_guy.big_guy import BigGuy
+        from src.agents.config import BaseAgentConfig
+
+        config_path = os.path.join("src", "agents", "big_guy", "big_guy.yaml")
+        config = BaseAgentConfig(**self._load_config(config_path))
+
+        tokenizer, model = self._get_tokenizer_and_model(config)
+
+        return BigGuy(tokenizer, model, config)
