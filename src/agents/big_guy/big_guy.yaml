@@ -1,0 +1,3 @@
+generate_config:
+    max_new_tokens: 128
+    do_sample: false
