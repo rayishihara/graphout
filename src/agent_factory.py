@@ -23,7 +23,7 @@ class AgentFactory:
         tokenizer = self._tokenizer_cache[model_name]
         model = self._model_cache[model_name]
         
-        if config.adapter_path is not None:
+        if config.adapter_path is not None and config.adapter_name not in getattr(model, "peft_config", {}):
             model.load_adapter(config.adapter_path, adapter_name=config.adapter_name)
             # It looks for adapter_config.json and adapter_model.safetensors at the path
             # This should be my local mlflow artifact folder
