@@ -11,7 +11,7 @@ def extract_csv_metadata(file_path):
         'column_count': df.shape[1]
     }
     
-    metadata['schemma'] = {}
+    metadata['schema'] = {}
     metadata['stats'] = {}
     
     for col in df.columns:
