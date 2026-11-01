@@ -33,7 +33,7 @@ class BaseAgent(ABC):
     ) -> str:       
         input_length = tokenized_prompt["input_ids"].shape[-1]
         response = self.model.generate(
-            **tokenized_prompt,
+            **tokenized_prompt.to(self.model.device),
             **self.generate_config,
         )
         generated_tokens = response[0][input_length:]

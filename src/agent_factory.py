@@ -1,9 +1,7 @@
 import os
 import yaml
-# from accelerator import Accelerator
+from accelerate import Accelerator
 from transformers import AutoModelForCausalLM, AutoTokenizer
-
-# TODO: Use accelerator to send the model to GPU if available
 
 class AgentFactory:
     def __init__(self) -> None:
@@ -18,7 +16,7 @@ class AgentFactory:
         model_name = config.name
         if model_name not in self._model_cache:
             self._tokenizer_cache[model_name] = AutoTokenizer.from_pretrained(model_name)
-            self._model_cache[model_name] = AutoModelForCausalLM.from_pretrained(model_name)
+            self._model_cache[model_name] = AutoModelForCausalLM.from_pretrained(model_name).to(Accelerator().device)
 
         tokenizer = self._tokenizer_cache[model_name]
         model = self._model_cache[model_name]
