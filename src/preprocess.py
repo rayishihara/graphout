@@ -16,9 +16,8 @@ def extract_csv_metadata(file_path):
     
     for col in df.columns:
         col_data = df[col]
+        null_count = int(col_data.isna().sum())
 
-        # TODO: nullability check
-        
         # Inferred type routing
         if pd.api.types.is_bool_dtype(col_data):
             inferred_type = 'boolean'
@@ -30,7 +29,9 @@ def extract_csv_metadata(file_path):
             inferred_type = 'categorical'
             
         metadata['schema'][col] = {
-            'inferred_type': inferred_type
+            'inferred_type': inferred_type,
+            'null_count': null_count,
+            'nullable': null_count > 0
         }
         
         # Statistical profile
