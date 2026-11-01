@@ -40,5 +40,5 @@ class BaseAgent(ABC):
         return self.tokenizer.decode(generated_tokens, skip_special_tokens=True)
 
     @abstractmethod
-    def run(self) -> str:
+    def run(self, message: str) -> str:
         raise NotImplementedError("Override this method")
