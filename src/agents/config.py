@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Literal
 from pydantic import BaseModel, model_validator
 
 class BaseAgentConfig(BaseModel):
@@ -35,3 +35,14 @@ class AnalystConfig(BaseAgentConfig):
         "max_new_tokens": 32,
     }
 
+class ChartSpec(BaseModel):
+    chart_type: Literal["bar", "line", "scatter", "histogram"]
+    x: str
+    y: str | None = None
+    title: str
+
+    @model_validator(mode="after")
+    def check_y_set(self) -> "ChartSpec":
+        if self.chart_type != "histogram" and self.y is None:
+            raise ValueError(f"'y' must be set for a {self.chart_type} chart")
+        return self
