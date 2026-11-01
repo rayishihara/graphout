@@ -28,7 +28,6 @@ RUN uv python install 3.13 &&\
 
 # Copy files
 COPY src/ ./src/
-COPY docs/ ./docs/
 
 # Just so we can run commands without prefixing them with uv run
 ENV PATH="/app/.venv/bin:$PATH"
